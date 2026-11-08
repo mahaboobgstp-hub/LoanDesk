@@ -1,0 +1,8 @@
+{
+  "appId": "in.loandesk.app",
+  "appName": "LoanDesk",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}
