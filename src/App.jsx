@@ -108,9 +108,31 @@ function Login({ onLogin, onSignup }) {
 function Shell({ profile, children, onLogout, active, setActive }) {
   return <div className="app-shell"><aside className="sidebar">
     <div className="brand"><span className="brand-mark small">LD</span><div><b>LoanDesk</b><small>Eligibility workspace</small></div></div>
-    <nav>
-      <button className={active==="dashboard"?"nav-active":""} onClick={()=>setActive("dashboard")}>▦ Dashboard</button>
-      {profile.role === "agent" && <button className={active==="new"?"nav-active":""} onClick={()=>setActive("new")}>＋ Add lead</button>}
+        <nav>
+      <button
+        className={active === "dashboard" ? "nav-active" : ""}
+        onClick={() => setActive("dashboard")}
+      >
+        ▦ My Applications
+      </button>
+
+      {profile.role === "agent" && (
+        <button
+          className={active === "new" ? "nav-active" : ""}
+          onClick={() => setActive("new")}
+        >
+          ＋ Add Lead
+        </button>
+      )}
+
+      {profile.role === "agent" && (
+        <button
+          className="nav-logout"
+          onClick={onLogout}
+        >
+          ↪ Logout
+        </button>
+      )}
     </nav>
     <div className="side-bottom"><div className="avatar">{(profile.full_name||"U").slice(0,1).toUpperCase()}</div><div className="profile-label"><b>{profile.full_name || "User"}</b><small>{profile.role}</small></div><button className="icon-button" onClick={onLogout} title="Sign out">↪</button></div>
   </aside><main className="main-area"><header className="topbar"><div><span className="eyebrow">WORKSPACE</span><h2>{active==="new"?"Create new lead":profile.role==="admin"?"Admin overview":"Agent overview"}</h2></div><span className="role-chip">{profile.role}</span></header>{children}</main></div>;
