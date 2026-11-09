@@ -85,11 +85,8 @@ Deno.serve(async (req) => {
       return respond({ error: "Agent Auth account not found" }, 404);
     }
 
-    if (!authUser.user.email_confirmed_at) {
-      return respond({
-        error: "Agent must verify their email before approval",
-      }, 409);
-    }
+        // Email verification is intentionally deferred during the current development phase.
+    // The Auth account must exist, but approval does not require email_confirmed_at.
 
     const { data: profile, error: profileError } = await admin
       .from("profiles")
