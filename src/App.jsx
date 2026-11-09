@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { supabase, isSupabaseConfigured } from "./lib/supabase";
+import AgentRegistration from "./components/AgentRegistration";
 import { signIn, signOut } from "./services/authService";
 import { listAllLeads, listMyLeads } from "./services/leadService";
 import { createLead } from "./services/leadService";
@@ -12,26 +13,95 @@ import StatusPill from "./components/StatusPill";
 
 const money = n => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(Number(n || 0));
 
-function Login({ onLogin }) {
-  const [email, setEmail] = useState(""); const [password, setPassword] = useState("");
-  const [busy, setBusy] = useState(false); const [error, setError] = useState("");
+function Login({ onLogin, onSignup }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
   async function submit(e) {
-    e.preventDefault(); setBusy(true); setError("");
-    try { await onLogin(email, password); } catch (err) { setError(err.message); }
-    finally { setBusy(false); }
+    e.preventDefault();
+    setBusy(true);
+    setError("");
+
+    try {
+      await onLogin(email, password);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
   }
-  return <main className="login-wrap"><section className="login-card">
-    <div className="brand-mark">LD</div><p className="eyebrow">LOAN ELIGIBILITY WORKSPACE</p>
-    <h1>Welcome back</h1><p className="muted">Sign in to your secure LoanDesk account.</p>
-    {!isSupabaseConfigured && <div className="notice warning">Supabase is not configured. Add the project URL and publishable key to your environment.</div>}
-    <form onSubmit={submit}>
-      <Field label="Email address"><input type="email" required value={email} onChange={e=>setEmail(e.target.value)} /></Field>
-      <Field label="Password"><input type="password" required value={password} onChange={e=>setPassword(e.target.value)} /></Field>
-      {error && <div className="notice danger">{error}</div>}
-      <button className="primary full" disabled={busy || !isSupabaseConfigured}>{busy ? "Signing in…" : "Sign in"}</button>
-    </form>
-    <p className="tiny muted">Accounts are provisioned by the administrator. Public registration is disabled.</p>
-  </section></main>;
+
+  return (
+    <main className="login-wrap">
+      <section className="login-card">
+        <div className="brand-mark">LD</div>
+
+        <p className="eyebrow">LOAN ELIGIBILITY WORKSPACE</p>
+        <h1>Welcome back</h1>
+
+        <p className="muted">
+          Sign in to your secure LoanDesk account.
+        </p>
+
+        {!isSupabaseConfigured && (
+          <div className="notice warning">
+            Supabase is not configured. Add the project URL and
+            publishable key to your environment.
+          </div>
+        )}
+
+        <form onSubmit={submit}>
+          <Field label="Email address">
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+            />
+          </Field>
+
+          <Field label="Password">
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+            />
+          </Field>
+
+          {error && (
+            <div className="notice danger">{error}</div>
+          )}
+
+          <button
+            className="primary full"
+            disabled={busy || !isSupabaseConfigured}
+          >
+            {busy ? "Signing in…" : "Sign in"}
+          </button>
+        </form>
+
+        <div className="login-divider">
+          <span>OR</span>
+        </div>
+
+        <button
+          type="button"
+          className="secondary full"
+          onClick={onSignup}
+        >
+          Sign Up as Agent
+        </button>
+
+        <p className="tiny muted">
+          New agents can register here. All registrations
+          require administrator approval.
+        </p>
+      </section>
+    </main>
+  );
 }
 
 function Shell({ profile, children, onLogout, active, setActive }) {
@@ -231,8 +301,14 @@ function DecisionWorkspace({ id, onBack }) {
 function Info({label,value}){return <div className="info-item"><span>{label}</span><b>{value??"—"}</b></div>}
 
 export default function App(){
-  const [session,setSession]=useState(null); const [profile,setProfile]=useState(null);
-  const [active,setActive]=useState("dashboard"); const [selected,setSelected]=useState(null); const [loading,setLoading]=useState(true);
+  const [session, setSession] = useState(null);
+const [profile, setProfile] = useState(null);
+
+const [active, setActive] = useState("dashboard");
+const [selected, setSelected] = useState(null);
+const [loading, setLoading] = useState(true);
+
+const [showAgentSignup, setShowAgentSignup] = useState(false);
   useEffect(()=>{
     if(!supabase){setLoading(false);return;}
     supabase.auth.getSession().then(async({data})=>{
@@ -249,7 +325,22 @@ export default function App(){
   async function login(email,password){const result=await signIn(email,password);setSession({user:result.user});setProfile(result.profile);}
   async function logout(){await signOut();setSession(null);setProfile(null);setSelected(null);}
   if(loading)return <div className="loading-screen">Loading LoanDesk…</div>;
-  if(!session||!profile)return <Login onLogin={login}/>;
+  if (!session || !profile) {
+  if (showAgentSignup) {
+    return (
+      <AgentRegistration
+        onBack={() => setShowAgentSignup(false)}
+      />
+    );
+  }
+
+  return (
+    <Login
+      onLogin={login}
+      onSignup={() => setShowAgentSignup(true)}
+    />
+  );
+}
   return <Shell profile={profile} onLogout={logout} active={active} setActive={v=>{setActive(v);setSelected(null);}}>
     {selected&&profile.role==="admin"?<DecisionWorkspace id={selected} onBack={()=>setSelected(null)}/>:
       active==="new"&&profile.role==="agent"?<LeadForm onCreated={()=>{setActive("dashboard");alert("Lead submitted successfully.");}}/>:
