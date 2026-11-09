@@ -185,14 +185,50 @@ function LeadForm({ onCreated }) {
         });
         if (coError) throw coError;
       }
-      if (report) {
-        const uploaded = await uploadPrivateDocument(lead.id, report, "credit_report");
-        const { error:reportError } = await supabase.from("credit_reports").insert({
-          application_id:lead.id, document_id:uploaded.id, bureau_name:form.bureau_name,
-          report_source:form.report_source, extraction_status:"pending_verification"
-        });
-        if (reportError) throw reportError;
-      }
+      
+if (report) {
+  const uploaded = await uploadPrivateDocument(
+    lead.id,
+    report,
+    "credit_report"
+  );
+
+  const { data: creditReport, error: reportError } = await supabase
+    .from("credit_reports")
+    .insert({
+      application_id: lead.id,
+      document_id: uploaded.id,
+      bureau_name: form.bureau_name,
+      report_source: form.report_source,
+      extraction_status: "pending_verification",
+    })
+    .select("id")
+    .single();
+
+  if (reportError) throw reportError;
+
+  const { data: extraction, error: extractionError } =
+    await supabase.functions.invoke("extract-credit-report", {
+      body: {
+        application_id: lead.id,
+        report_id: creditReport.id,
+      },
+    });
+
+  if (extractionError) {
+    throw new Error(
+      extractionError.message ||
+      "Credit report uploaded, but server extraction could not start."
+    );
+  }
+
+  if (!extraction?.success) {
+    throw new Error(
+      extraction?.error || "Credit report extraction failed."
+    );
+  }
+}
+
       onCreated();
     } catch(err) { setError(err.message); }
     finally { setBusy(false); }
