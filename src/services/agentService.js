@@ -1,6 +1,7 @@
 
 import { supabase } from "../lib/supabase";
 
+
 export async function registerAgent(payload) {
   if (!supabase) {
     throw new Error("Supabase is not configured.");
@@ -15,11 +16,10 @@ export async function registerAgent(payload) {
     status: "pending"
   };
 
-  const { data, error } = await supabase
+  // Insert only. Do not request a returned row.
+  const { error } = await supabase
     .from("agent_registrations")
-    .insert(registration)
-    .select("id, email, status, created_at")
-    .single();
+    .insert(registration);
 
   if (error) {
     if (error.code === "23505") {
@@ -27,11 +27,16 @@ export async function registerAgent(payload) {
         "A registration already exists for this email."
       );
     }
+
     throw error;
   }
 
-  return data;
+  return {
+    email: registration.email,
+    status: registration.status
+  };
 }
+
 
 export async function listAgentRegistrations() {
   const { data, error } = await supabase
