@@ -341,10 +341,47 @@ const [showAgentSignup, setShowAgentSignup] = useState(false);
       onSignup={() => setShowAgentSignup(true)}
     />
   );
+}if (profile.role === "admin") {
+  return (
+    <AdminWorkspace
+      profile={profile}
+      onLogout={logout}
+      onOpenApplication={id => setSelected(id)}
+    >
+      {selected && (
+        <DecisionWorkspace
+          id={selected}
+          onBack={() => setSelected(null)}
+        />
+      )}
+    </AdminWorkspace>
+  );
 }
-  return <Shell profile={profile} onLogout={logout} active={active} setActive={v=>{setActive(v);setSelected(null);}}>
-    {selected&&profile.role==="admin"?<DecisionWorkspace id={selected} onBack={()=>setSelected(null)}/>:
-      active==="new"&&profile.role==="agent"?<LeadForm onCreated={()=>{setActive("dashboard");alert("Lead submitted successfully.");}}/>:
-      <Dashboard profile={profile} onNewLead={()=>setActive("new")} onOpen={id=>setSelected(id)}/>}
-  </Shell>;
+
+return (
+  <Shell
+    profile={profile}
+    onLogout={logout}
+    active={active}
+    setActive={v => {
+      setActive(v);
+      setSelected(null);
+    }}
+  >
+    {active === "new" ? (
+      <LeadForm
+        onCreated={() => {
+          setActive("dashboard");
+          alert("Lead submitted successfully.");
+        }}
+      />
+    ) : (
+      <Dashboard
+        profile={profile}
+        onNewLead={() => setActive("new")}
+        onOpen={id => setSelected(id)}
+      />
+    )}
+  </Shell>
+);
 }
