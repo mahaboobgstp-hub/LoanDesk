@@ -24,3 +24,29 @@ export async function getProfile(userId) {
   if (error) throw error;
   return data;
 }
+export async function sendPasswordReset(email) {
+  if (!supabase) throw new Error("Supabase is not configured.");
+
+  const { error } = await supabase.auth.resetPasswordForEmail(
+    email.trim().toLowerCase(),
+    {
+      redirectTo: "https://loandesk-api4sansn-mahaboobs-projects-c4dc881b.vercel.app",
+    }
+  );
+
+  if (error) throw error;
+
+  return true;
+}
+
+export async function updatePassword(newPassword) {
+  if (!supabase) throw new Error("Supabase is not configured.");
+
+  const { error } = await supabase.auth.updateUser({
+    password: newPassword,
+  });
+
+  if (error) throw error;
+
+  return true;
+}
