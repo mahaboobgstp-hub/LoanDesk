@@ -3,6 +3,7 @@ import { supabase, isSupabaseConfigured } from "./lib/supabase";
 import AgentRegistration from "./components/AgentRegistration";
 import { signIn, signOut } from "./services/authService";
 import { listAllLeads, listMyLeads } from "./services/leadService";
+import AdminWorkspace from "./components/AdminWorkspace";
 import { createLead } from "./services/leadService";
 import { uploadPrivateDocument } from "./services/documentService";
 import { saveAssessment, updateApplicationDecision, saveDocumentRequirements } from "./services/decisionService";
