@@ -247,3 +247,43 @@
     padding: 15px;
   }
 }
+/* AGENT MOBILE AND DESKTOP NAVIGATION */
+
+.sidebar nav .nav-logout {
+  margin-top: 12px;
+  border-top: 1px solid #29405e;
+  border-radius: 0;
+  padding-top: 15px;
+  color: #ffb4a9;
+  font-weight: 700;
+}
+
+.sidebar nav .nav-logout:hover {
+  background: #29364b;
+  color: #ffffff;
+}
+
+/* Mobile agent navigation */
+
+@media(max-width:650px) {
+  .sidebar nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .sidebar nav button {
+    flex: 1 1 auto;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .sidebar nav .nav-logout {
+    flex: 0 0 100%;
+    margin-top: 5px;
+    padding: 10px;
+    border-top: 1px solid #29405e;
+    text-align: left;
+  }
+}
