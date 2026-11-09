@@ -7,34 +7,24 @@ export async function registerAgent(payload) {
     throw new Error("Supabase is not configured.");
   }
 
-  const registration = {
-    full_name: payload.full_name.trim(),
-    email: payload.email.trim().toLowerCase(),
-    mobile: payload.mobile.trim(),
-    city: payload.city.trim(),
-    state: payload.state.trim(),
-    status: "pending"
-  };
-
-  // Insert only. Do not request a returned row.
-  const { error } = await supabase
-    .from("agent_registrations")
-    .insert(registration);
-
-  if (error) {
-    if (error.code === "23505") {
-      throw new Error(
-        "A registration already exists for this email."
-      );
+  const { data, error } = await supabase.functions.invoke(
+    "register-agent",
+    {
+      body: {
+        full_name: payload.full_name.trim(),
+        email: payload.email.trim().toLowerCase(),
+        mobile: payload.mobile.trim(),
+        city: payload.city.trim(),
+        state: payload.state.trim(),
+        password: payload.password,
+      },
     }
+  );
 
-    throw error;
-  }
+  if (error) throw error;
+  if (data?.error) throw new Error(data.error);
 
-  return {
-    email: registration.email,
-    status: registration.status
-  };
+  return data;
 }
 
 
